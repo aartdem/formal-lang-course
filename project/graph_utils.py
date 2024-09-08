@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import Set, Any
 
 import cfpq_data
 import networkx as nx
@@ -9,7 +9,7 @@ import networkx as nx
 class GraphInfo:
     node_count: int
     edge_count: int
-    edge_labels_list: List[int]
+    edge_labels: Set[Any]
 
 
 def extract_graph_info(graph_name: str) -> GraphInfo:
@@ -19,7 +19,7 @@ def extract_graph_info(graph_name: str) -> GraphInfo:
     return GraphInfo(
         node_count=graph.number_of_nodes(),
         edge_count=graph.number_of_edges(),
-        edge_labels_list=cfpq_data.get_sorted_labels(graph),
+        edge_labels=set(cfpq_data.get_sorted_labels(graph)),
     )
 
 
