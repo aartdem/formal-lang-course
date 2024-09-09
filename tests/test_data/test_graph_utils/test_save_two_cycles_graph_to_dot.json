@@ -1,0 +1,68 @@
+{
+  "test_save_two_cycles_graph_to_dot": [
+    {
+      "is_succeed": true,
+      "size1": 3,
+      "size2": 4,
+      "label1": "i",
+      "label2": "j",
+      "path": "graph0",
+      "edges": [
+        [0, 1, {"label": "i"}],
+        [1, 2, {"label": "i"}],
+        [2, 3, {"label": "i"}],
+        [3, 0, {"label": "i"}],
+        [0, 4, {"label": "j"}],
+        [4, 5, {"label": "j"}],
+        [5, 6, {"label": "j"}],
+        [6, 7, {"label": "j"}],
+        [7, 0, {"label": "j"}]
+      ]
+    },
+    {
+      "is_succeed": true,
+      "size1": 1,
+      "size2": 1,
+      "label1": "i",
+      "label2": "j",
+      "path": "graph1",
+      "edges": [
+        [0, 1, {"label": "i"}],
+        [1, 0, {"label": "i"}],
+        [0, 2, {"label": "j"}],
+        [2, 0, {"label": "j"}]
+      ]
+    },
+    {
+      "is_succeed": true,
+      "size1": 1,
+      "size2": 2,
+      "label1": "i",
+      "label2": "j",
+      "path": "graph2",
+      "edges": [
+        [0, 1, {"label": "i"}],
+        [1, 0, {"label": "i"}],
+        [0, 2, {"label": "j"}],
+        [2, 3, {"label": "j"}],
+        [3, 0, {"label": "j"}]
+      ]
+    },
+    {
+      "is_succeed": false,
+      "size1": -1,
+      "size2": 3,
+      "label1": "i",
+      "label2": "j",
+      "path": "graph3"
+    },
+    {
+      "is_succeed": false,
+      "size1": 2,
+      "size2": 0,
+      "label1": "i",
+      "label2": "j",
+      "path": "graph4"
+    }
+  ]
+}
