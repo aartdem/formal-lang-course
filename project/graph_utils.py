@@ -26,6 +26,9 @@ def extract_graph_info(graph_name: str) -> GraphInfo:
 def save_two_cycles_graph_to_dot(
     size1: int, size2: int, label1: str, label2: str, path: str
 ):
+    if size1 < 1 or size2 < 1:
+        raise ValueError("Size of each cycle without common node should be at least 2")
+
     graph = cfpq_data.labeled_two_cycles_graph(
         n=size1, m=size2, labels=(label1, label2)
     )
