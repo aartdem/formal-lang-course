@@ -24,7 +24,6 @@ def test_extract_graph_info(test_data: dict):
     graph_name = test_data["graph_name"]
 
     if test_data["is_graph_name_supported"]:
-        assert True
         expected_info = GraphInfo(
             node_count=int(test_data["node_count"]),
             edge_count=int(test_data["edge_count"]),
