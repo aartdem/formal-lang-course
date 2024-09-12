@@ -1,0 +1,47 @@
+{
+  "test_extract_graph_info": [
+    {
+      "is_graph_name_supported": true,
+      "graph_name": "skos",
+      "node_count": 144,
+      "edge_count": 252,
+      "edge_labels_list": [
+        "subPropertyOf",
+        "label",
+        "comment",
+        "definition",
+        "isDefinedBy",
+        "type",
+        "domain",
+        "range",
+        "scopeNote",
+        "inverseOf",
+        "example",
+        "seeAlso",
+        "title",
+        "contributor",
+        "description",
+        "creator",
+        "first",
+        "rest",
+        "disjointWith",
+        "unionOf",
+        "subClassOf"
+      ]
+    },
+    {
+      "is_graph_name_supported": true,
+      "graph_name": "wc",
+      "node_count": 332,
+      "edge_count": 269,
+      "edge_labels_list": [
+        "a",
+        "d"
+      ]
+    },
+    {
+      "is_graph_name_supported": false,
+      "graph_name": "not supported name"
+    }
+  ]
+}
