@@ -9,11 +9,11 @@ from project.task2 import regex_to_dfa, graph_to_nfa
 
 
 class TestRegexToDfaAdditional:
-    def test_regex_to_dfa_is_empty(self):
+    def test_is_empty(self):
         dfa = regex_to_dfa("")
         assert dfa.is_empty()
 
-    def test_regex_to_dfa_incorrect_regex(self):
+    def test_incorrect_regex(self):
         with pytest.raises(MisformedRegexError):
             regex_to_dfa("( a")
 
@@ -25,15 +25,15 @@ class TestGraphToNfaAdditional:
     graph_for_test.add_edge(1, 1, "b")
     graph_for_test.add_edge(1, 2, "c")
 
-    def test_graph_to_nfa_incorrect_start_states(self):
+    def test_incorrect_start_states(self):
         with pytest.raises(ValueError):
             graph_to_nfa(self.graph_for_test, {-1}, set())
 
-    def test_graph_to_nfa_incorrect_end_states(self):
+    def test_incorrect_end_states(self):
         with pytest.raises(ValueError):
             graph_to_nfa(self.graph_for_test, set(), {4})
 
-    def test_graph_to_nfa_with_import_by_name(self):
+    def test_with_importing_by_name(self):
         graph_name = "generations"
         graph_info = extract_graph_info(graph_name)
         graph_path = cfpq_data.download(graph_name)
@@ -46,7 +46,7 @@ class TestGraphToNfaAdditional:
         assert nfa.start_states == {0}
         assert nfa.final_states == {1}
 
-    def test_graph_to_nfa_with_create(self, tmp_path):
+    def test_with_creating_dot(self, tmp_path):
         n = 3
         m = 4
         graph_path = f"{tmp_path}/test_graph"
