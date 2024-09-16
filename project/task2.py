@@ -6,8 +6,9 @@ from pyformlang.finite_automaton import (
     DeterministicFiniteAutomaton,
     EpsilonNFA,
     NondeterministicFiniteAutomaton,
+    State,
 )
-from pyformlang.finite_automaton.finite_automaton import to_symbol
+from pyformlang.finite_automaton.finite_automaton import to_symbol, to_state
 from pyformlang.regular_expression import Regex
 
 
@@ -24,8 +25,8 @@ def _to_int_if_possible(node: Any) -> Any:
         return node
 
 
-def _convert_nodes_to_states(nodeView: NodeView):
-    return set(map(_to_int_if_possible, nodeView))
+def _convert_nodes_to_states(nodeView: NodeView) -> Set[State]:
+    return set(map(lambda x: to_state(_to_int_if_possible(x)), nodeView))
 
 
 def graph_to_nfa(

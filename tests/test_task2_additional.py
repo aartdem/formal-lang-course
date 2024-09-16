@@ -58,4 +58,4 @@ class TestGraphToNfaAdditional:
         assert nfa.get_number_transitions() == n + m + 2
         assert nfa.symbols == {"a", "b"}
         assert nfa.start_states == {0}
-        assert nfa.final_states == {4}
+        assert nfa.final_states == {n + 1}
