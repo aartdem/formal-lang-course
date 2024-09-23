@@ -220,11 +220,7 @@ def tensor_based_rpq(
     regex: str, graph: MultiDiGraph, start_nodes: set[int], final_nodes: set[int]
 ) -> set[tuple[int, int]]:
     regex_dfa = AdjacencyMatrixFA(regex_to_dfa(regex))
-
     nfa = AdjacencyMatrixFA(graph_to_nfa(graph, start_nodes, final_nodes))
-    start_nodes = [nfa.states_mapping[to_state(node)] for node in start_nodes]
-    final_nodes = [nfa.states_mapping[to_state(node)] for node in final_nodes]
-
     intersection = intersect_automata(regex_dfa, nfa)
     intersection_tc = intersection.get_transitive_closure()
 
