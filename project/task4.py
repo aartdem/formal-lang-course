@@ -1,15 +1,14 @@
 from functools import reduce
 from symtable import Symbol
 
-import numpy as np
 from networkx.classes import MultiDiGraph
-from scipy.sparse import bsr_matrix
+from scipy.sparse import bsr_matrix, vstack
 
 from project.task2 import regex_to_dfa, graph_to_nfa
 from project.task3 import AdjacencyMatrixFA
 
 
-def _calculate_helper_matrix(matrix: bsr_matrix) -> bsr_matrix:
+def _create_helper_matrix(matrix: bsr_matrix) -> bsr_matrix:
     inv_rows = []
     inv_cols = []
     n, m = (matrix.shape[0], matrix.shape[1])
@@ -24,48 +23,21 @@ def _calculate_helper_matrix(matrix: bsr_matrix) -> bsr_matrix:
     )
 
 
-def _init_front_and_visited(
-    dfa: AdjacencyMatrixFA, nfa: AdjacencyMatrixFA
-) -> (bsr_matrix, np.ndarray):
+def _init_front(dfa: AdjacencyMatrixFA, nfa: AdjacencyMatrixFA):
     if len(dfa.start_states) != 1:
         raise RuntimeError("DFA should have only one start state")
 
     dfa_start_state = list(dfa.start_states)[0]
-    nfa_start_states = list(nfa.start_states)
-    front = bsr_matrix(
-        (
-            [True] * len(nfa_start_states),
-            ([dfa_start_state] * len(nfa_start_states), nfa_start_states),
-        ),
-        shape=(dfa.states_count, nfa.states_count),
-        dtype=bool,
+    return vstack(
+        [
+            bsr_matrix(
+                ([True], ([dfa_start_state], [nfa_start_state])),
+                shape=(dfa.states_count, nfa.states_count),
+                dtype=bool,
+            )
+            for nfa_start_state in nfa.start_states
+        ]
     )
-
-    visited: np.array = np.zeros(nfa.states_count, dtype=bool)
-    for start in nfa_start_states:
-        visited[start] = True
-
-    return front, visited
-
-
-def _update_front_and_visited(
-    last_front: bsr_matrix, visited: np.ndarray
-) -> (bsr_matrix, np.ndarray):
-    new_front = []
-    for row in last_front.tocsr():
-        new_row: np.ndarray = np.logical_and(row.toarray(), np.logical_not(visited))
-        new_front.append(new_row)
-    for row in new_front:
-        visited = np.logical_or(visited, row)
-    new_front = bsr_matrix(np.vstack(new_front))
-    return new_front, visited
-
-
-def _is_true_in_front(front: bsr_matrix) -> bool:
-    for row in front.tocsr():
-        if True in row.toarray():
-            return True
-    return False
 
 
 def ms_bfs_based_rpq(
@@ -75,18 +47,39 @@ def ms_bfs_based_rpq(
     nfa = AdjacencyMatrixFA(graph_to_nfa(graph, start_nodes, final_nodes))
     permutation_matrices: dict[Symbol, bsr_matrix] = {}
     for symbol, matrix in dfa.bool_decomposition.items():
-        permutation_matrices[symbol] = _calculate_helper_matrix(matrix)
+        permutation_matrices[symbol] = _create_helper_matrix(matrix)
+    nfa_id_to_state = nfa.id_to_state_mapping
 
-    front, visited = _init_front_and_visited(dfa, nfa)
-    while _is_true_in_front(front):
-        fronts: dict[Symbol, bsr_matrix] = {}
+    front = _init_front(dfa, nfa)
+    visited = front
+    while front.toarray().any():
+        next_fronts: dict[Symbol, bsr_matrix] = {}
         for symbol in dfa.bool_decomposition.keys():
             if symbol not in nfa.bool_decomposition:
                 continue
-            nfa_adj_matrix = nfa.bool_decomposition[symbol]
             permutation_matrix = permutation_matrices[symbol]
-            fronts[symbol] = permutation_matrix.dot(front.dot(nfa_adj_matrix))
-        raw_front = reduce(lambda x, y: x + y, fronts.values(), front)
-        front, visited = _update_front_and_visited(raw_front, visited)
+            next_front = front @ nfa.bool_decomposition[symbol]
+            next_fronts[symbol] = vstack(
+                [
+                    permutation_matrix
+                    @ next_front[dfa.states_count * idx : dfa.states_count * (idx + 1)]
+                    for idx in range(len(start_nodes))
+                ]
+            )
+        front = reduce(lambda x, y: x + y, next_fronts.values(), front)
+        front = front > visited
+        visited = visited + front
 
-    return set()
+    result: set[tuple[int, int]] = set()
+    for dfa_idx in range(dfa.states_count):
+        if dfa_idx in dfa.final_states:
+            for nfa_start_idx, nfa_start in enumerate(start_nodes):
+                visited_slice = visited[
+                    nfa_start_idx * dfa.states_count : dfa.states_count
+                    * (nfa_start_idx + 1)
+                ]
+                for nfa_final_idx in visited_slice.getrow(dfa_idx).indices:
+                    nfa_final = nfa_id_to_state[nfa_final_idx].value
+                    if nfa_final in final_nodes:
+                        result.add((nfa_start, nfa_final))
+    return result
