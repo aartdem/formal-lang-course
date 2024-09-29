@@ -41,7 +41,7 @@ def _init_front_and_visited(
         dtype=bool,
     )
 
-    visited: np.array = np.zeros(len(nfa_start_states), dtype=bool)
+    visited: np.array = np.zeros(nfa.states_count, dtype=bool)
     for start in nfa_start_states:
         visited[start] = True
 
@@ -60,11 +60,13 @@ def _update_front_and_visited(
     new_front = bsr_matrix(np.vstack(new_front))
     return new_front, visited
 
+
 def _is_true_in_front(front: bsr_matrix) -> bool:
     for row in front.tocsr():
         if True in row.toarray():
             return True
     return False
+
 
 def ms_bfs_based_rpq(
     regex: str, graph: MultiDiGraph, start_nodes: set[int], final_nodes: set[int]
