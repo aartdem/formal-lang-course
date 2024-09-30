@@ -10,7 +10,7 @@ from project.task3 import AdjacencyMatrixFA
 
 def _init_front(dfa: AdjacencyMatrixFA, nfa: AdjacencyMatrixFA):
     if len(dfa.start_states) != 1:
-        raise RuntimeError("DFA should have only one start state")
+        raise ValueError("DFA should have only one start state")
 
     dfa_start_state = list(dfa.start_states)[0]
     return vstack(
