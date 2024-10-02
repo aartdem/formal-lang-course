@@ -107,8 +107,15 @@ class AdjacencyMatrixFA:
         return self._states_count
 
     @property
-    def states_mapping(self) -> dict[State, int]:
+    def state_to_id_mapping(self) -> dict[State, int]:
         return self._states_to_int_mapping
+
+    @property
+    def id_to_state_mapping(self) -> dict[int, State]:
+        res = {}
+        for state, idx in self._states_to_int_mapping.items():
+            res[idx] = state
+        return res
 
     @property
     def start_states(self) -> Set[int]:
@@ -190,8 +197,8 @@ def intersect_automata(
         final_states.add(final1 * automaton2.states_count + final2)
 
     states_mapping: dict[State, int] = {}
-    for state1, id1 in automaton1.states_mapping.items():
-        for state2, id2 in automaton2.states_mapping.items():
+    for state1, id1 in automaton1.state_to_id_mapping.items():
+        for state2, id2 in automaton2.state_to_id_mapping.items():
             states_mapping[to_state((state1, state2))] = (
                 id1 * automaton2.states_count + id2
             )
@@ -231,11 +238,11 @@ def tensor_based_rpq(
         for nfa_start, nfa_final in itertools.product(start_nodes, final_nodes):
             row_id = (
                 regex_dfa_start * nfa.states_count
-                + nfa.states_mapping[to_state(nfa_start)]
+                + nfa.state_to_id_mapping[to_state(nfa_start)]
             )
             col_id = (
                 regex_dfa_final * nfa.states_count
-                + nfa.states_mapping[to_state(nfa_final)]
+                + nfa.state_to_id_mapping[to_state(nfa_final)]
             )
             row = intersection_tc.getrow(row_id)
             if col_id in row.indices:
