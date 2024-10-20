@@ -15,3 +15,12 @@ def load_tests_from_json(path: str, test_name: str) -> List[Any]:
             )
         else:
             return d[test_name]
+
+
+def are_contain_same_elements(l1: list, l2: list) -> bool:
+    if len(l1) != len(l2):
+        return False
+    for element in l1:
+        if not element in l2:
+            return False
+    return True
