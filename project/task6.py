@@ -31,59 +31,47 @@ def hellings_based_cfpq(
     start_nodes: set[int] = None,
     final_nodes: set[int] = None,
 ) -> set[tuple[int, int]]:
-    cfg_weak_normal_form = cfg_to_weak_normal_form(cfg)
+    cfg_wnf = cfg_to_weak_normal_form(cfg)
     nfa = AdjacencyMatrixFA(graph_to_nfa(MultiDiGraph(graph), start_nodes, final_nodes))
     r = set()
-    for p in cfg_weak_normal_form.productions:
+    for p in cfg_wnf.productions:
         if len(p.body) == 2:
             continue
         terminal = p.body[0]
         if isinstance(terminal, Epsilon):
-            for node_v in nfa.id_to_state.keys():
-                r.add((p.head, node_v, node_v))
+            for v in nfa.id_to_state.keys():
+                r.add((p.head, v, v))
         else:
             symbol = to_symbol(terminal.value)
             if symbol in nfa.bool_decomposition.keys():
-                for row, col in zip(*nfa.bool_decomposition[symbol].nonzero()):
-                    r.add((p.head, row, col))
+                for v, u in zip(*nfa.bool_decomposition[symbol].nonzero()):
+                    r.add((p.head, v, u))
 
     new = r.copy()
     while new:
-        (var_n, node_u, node_v) = new.pop()
+        N, u, v = new.pop()
         tuples_to_add = set()
-        for (
-            var_m,
-            node_w,
-            node_x,
-        ) in r:
-            if node_u == node_x:
-                for p in cfg_weak_normal_form.productions:
-                    tuple_to_add = (p.head, node_w, node_v)
-                    if (
-                        len(p.body) == 2
-                        and p.body == [var_m, var_n]
-                        and tuple_to_add not in r
-                    ):
+        for M, w, x in r:
+            if u == x:
+                for p in cfg_wnf.productions:
+                    tuple_to_add = (p.head, w, v)
+                    if len(p.body) == 2 and p.body == [M, N] and tuple_to_add not in r:
                         tuples_to_add.add(tuple_to_add)
-            elif node_v == node_w:
-                for p in cfg_weak_normal_form.productions:
-                    tuple_to_add = (p.head, node_u, node_x)
-                    if (
-                        len(p.body) == 2
-                        and p.body == [var_n, var_m]
-                        and tuple_to_add not in r
-                    ):
+            if v == w:
+                for p in cfg_wnf.productions:
+                    tuple_to_add = (p.head, u, x)
+                    if len(p.body) == 2 and p.body == [N, M] and tuple_to_add not in r:
                         tuples_to_add.add(tuple_to_add)
         r.update(tuples_to_add)
         new.update(tuples_to_add)
 
     answer = set()
     id_to_state = nfa.id_to_state
-    for var, node_u, node_v in r:
+    for N, u, v in r:
         if (
-            var == cfg_weak_normal_form.start_symbol
-            and node_u in nfa.start_states_ids
-            and node_v in nfa.final_states_ids
+            N == cfg_wnf.start_symbol
+            and u in nfa.start_states_ids
+            and v in nfa.final_states_ids
         ):
-            answer.add((id_to_state[node_u].value, id_to_state[node_v].value))
+            answer.add((id_to_state[u].value, id_to_state[v].value))
     return answer
