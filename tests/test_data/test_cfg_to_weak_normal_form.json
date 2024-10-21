@@ -1,0 +1,19 @@
+{
+  "test_cfg_to_weak_normal_form": [
+    {
+      "text": "S -> $"
+    },
+    {
+      "text": "S -> a S | $"
+    },
+    {
+      "text": "S -> a S b | a b"
+    },
+    {
+      "text": "S -> a A | b B | S S \n A -> a \n B -> b"
+    },
+     {
+      "text": "S -> a S a | K \n K -> a K b | a"
+    }
+  ]
+}
