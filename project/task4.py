@@ -9,10 +9,10 @@ from project.task3 import AdjacencyMatrixFA
 
 
 def _init_front(dfa: AdjacencyMatrixFA, nfa: AdjacencyMatrixFA):
-    if len(dfa.start_states) != 1:
+    if len(dfa.start_states_ids) != 1:
         raise ValueError("DFA should have only one start state")
 
-    dfa_start_state = list(dfa.start_states)[0]
+    dfa_start_state = list(dfa.start_states_ids)[0]
     return vstack(
         [
             bsr_matrix(
@@ -20,7 +20,7 @@ def _init_front(dfa: AdjacencyMatrixFA, nfa: AdjacencyMatrixFA):
                 shape=(dfa.states_count, nfa.states_count),
                 dtype=bool,
             )
-            for nfa_start_state in nfa.start_states
+            for nfa_start_state in nfa.start_states_ids
         ]
     )
 
@@ -55,19 +55,16 @@ def ms_bfs_based_rpq(
         visited = visited + front
 
     result: set[tuple[int, int]] = set()
-    nfa_id_to_state_mapping = nfa.id_to_state_mapping
-    for dfa_final in dfa.final_states:
-        for nfa_start_idx, nfa_start in enumerate(nfa.start_states):
-            visited_slice = visited[
-                dfa.states_count * nfa_start_idx : dfa.states_count
-                * (nfa_start_idx + 1)
-            ]
-            for nfa_reached in visited_slice.getrow(dfa_final).indices:
-                if nfa_reached in nfa.final_states:
+    nfa_id_to_state = nfa.id_to_state
+    for dfa_final_id in dfa.final_states_ids:
+        for i, nfa_start_id in enumerate(nfa.start_states_ids):
+            visited_slice = visited[dfa.states_count * i : dfa.states_count * (i + 1)]
+            for nfa_reached_id in visited_slice.getrow(dfa_final_id).indices:
+                if nfa_reached_id in nfa.final_states_ids:
                     result.add(
                         (
-                            nfa_id_to_state_mapping[nfa_start].value,
-                            nfa_id_to_state_mapping[nfa_reached].value,
+                            nfa_id_to_state[nfa_start_id].value,
+                            nfa_id_to_state[nfa_reached_id].value,
                         )
                     )
     return result
