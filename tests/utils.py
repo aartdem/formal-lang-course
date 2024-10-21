@@ -21,6 +21,6 @@ def are_contain_same_elements(l1: list, l2: list) -> bool:
     if len(l1) != len(l2):
         return False
     for element in l1:
-        if not element in l2:
+        if element not in l2:
             return False
     return True
