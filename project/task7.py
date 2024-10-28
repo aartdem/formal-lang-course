@@ -1,3 +1,4 @@
+import itertools
 from collections import defaultdict
 
 import networkx as nx
@@ -20,45 +21,45 @@ def matrix_based_cfpq(
 ) -> set[tuple[int, int]]:
     nfa = AdjacencyMatrixFA(graph_to_nfa(MultiDiGraph(graph), start_nodes, final_nodes))
     cfg_wnf = cfg_to_weak_normal_form(cfg)
-    bool_decomp: dict[Variable, bsr_matrix] = {
-        p.head: bsr_matrix(np.zeros((nfa.states_count, nfa.states_count), dtype=bool))
-        for p in cfg_wnf.productions
-    }
 
     body_to_heads = defaultdict(list)
     for p in cfg_wnf.productions:
         body_to_heads[tuple(p.body)].append(p.head)
 
-    def process_terminal(term: Terminal, matr: bsr_matrix):
+    bool_decomp: dict[Variable, bsr_matrix] = {
+        head: bsr_matrix(np.zeros((nfa.states_count, nfa.states_count), dtype=bool))
+        for head in list(itertools.chain.from_iterable(body_to_heads.values()))
+    }
+
+    def add_matrix_for_term(term: Terminal, matr: bsr_matrix):
         tup = tuple([term])
-        for h in body_to_heads[tup]:
-            bool_decomp[h] = bool_decomp[h] + matr
+        if tup in body_to_heads:
+            for h in body_to_heads[tup]:
+                bool_decomp[h] += matr
 
     for symbol, matrix in nfa.bool_decomposition.items():
-        process_terminal(Terminal(symbol), matrix)
+        add_matrix_for_term(Terminal(symbol), matrix)
     if "epsilon" not in nfa.bool_decomposition.keys():
         n = nfa.states_count
-        process_terminal(
+        add_matrix_for_term(
             Epsilon(),
             bsr_matrix(
-                ([True] * n, (list(range(n)), list(range(n)))),
-                shape=(n, n),
-                dtype=bool,
+                [[True if i == j else False for i in range(n)] for j in range(n)]
             ),
         )
 
-    changed = True
-    while changed:
-        changed = False
+    changed_vars = {var for var in bool_decomp.keys()}
+    while changed_vars:
+        current_var = changed_vars.pop()
         for body, heads in body_to_heads.items():
-            if len(body) != 2:
+            if len(body) != 2 or current_var not in body:
                 continue
-            new_matrix = bool_decomp[body[0]] @ bool_decomp[body[1]]
+            matrix_to_add = bool_decomp[body[0]] @ bool_decomp[body[1]]
             for head in heads:
-                before = bool_decomp[head]
-                bool_decomp[head] = bool_decomp[head] + new_matrix
-                if not changed:
-                    changed = len((before != bool_decomp[head]).nonzero()[0]) != 0
+                new_matrix = bool_decomp[head] + matrix_to_add
+                if (bool_decomp[head] != new_matrix).count_nonzero() > 0:
+                    bool_decomp[head] = new_matrix
+                    changed_vars.add(head)
 
     return {
         (nfa.id_to_state[start_id].value, nfa.id_to_state[final_id].value)
