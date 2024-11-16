@@ -54,10 +54,10 @@ def _to_adj_matrix(rsm: RecursiveAutomaton) -> AdjacencyMatrixFA:
 
 
 def tensor_based_cfpq(
-        rsm: pyformlang.rsa.RecursiveAutomaton,
-        graph: nx.DiGraph,
-        start_nodes: set[int] = None,
-        final_nodes: set[int] = None,
+    rsm: pyformlang.rsa.RecursiveAutomaton,
+    graph: nx.DiGraph,
+    start_nodes: set[int] = None,
+    final_nodes: set[int] = None,
 ) -> set[tuple[int, int]]:
     rsm_matr = _to_adj_matrix(rsm)
     graph_matr = AdjacencyMatrixFA(
@@ -83,10 +83,10 @@ def tensor_based_cfpq(
 
 
 def _calculate_new_transitions(
-        rsm_matr: AdjacencyMatrixFA, graph_matr: AdjacencyMatrixFA
+    rsm_matr: AdjacencyMatrixFA, graph_matr: AdjacencyMatrixFA
 ) -> list[tuple[int, Symbol, int]]:
     def unpack_intersect_state_id(
-            intersect_state_id: int,
+        intersect_state_id: int,
     ) -> tuple[Symbol, int, int]:
         state_value = intersection.id_to_state[intersect_state_id].value
         box_symbol = state_value[0].value[0]
@@ -105,9 +105,9 @@ def _calculate_new_transitions(
                 "The states of the rsm from different boxes cannot be reached from each other"
             )
         if (
-                rsm_st_i in rsm_matr.start_states_ids
-                and rsm_st_j in rsm_matr.final_states_ids
-                and not graph_matr.has_transition(graph_st_i, box_symb_i, graph_st_j)
+            rsm_st_i in rsm_matr.start_states_ids
+            and rsm_st_j in rsm_matr.final_states_ids
+            and not graph_matr.has_transition(graph_st_i, box_symb_i, graph_st_j)
         ):
             new_transitions.append((graph_st_i, box_symb_i, graph_st_j))
 
