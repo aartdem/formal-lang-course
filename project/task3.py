@@ -127,6 +127,26 @@ class AdjacencyMatrixFA:
     def bool_decomposition(self):
         return self._bool_decomposition
 
+    def add_transition(self, from_id, symbol, to_id):
+        if self.has_transition(from_id, symbol, to_id):
+            return
+
+        if symbol not in self._bool_decomposition.keys():
+            self._bool_decomposition[symbol] = bsr_matrix(
+                ([True], ([from_id], [to_id])),
+                shape=(self._states_count, self._states_count),
+                dtype=bool,
+            )
+        else:
+            matrix_csr = self._bool_decomposition[symbol].tocsr()
+            matrix_csr[from_id, to_id] = True
+            self._bool_decomposition[symbol] = matrix_csr.tobsr()
+
+    def has_transition(self, from_id, symbol, to_id) -> bool:
+        if symbol in self._bool_decomposition.keys():
+            return self._bool_decomposition[symbol].getrow(from_id)[0, to_id]
+        return False
+
     def accepts(self, word: Iterable[Symbol]) -> bool:
         current_states: Set[int] = self._start_states_ids
         for symbol in word:
