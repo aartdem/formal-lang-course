@@ -38,6 +38,7 @@ class TestRegexToDfa:
         dfa = regex_to_dfa(regex_str)
 
         minimized_dfa = dfa.minimize()
+        assert minimized_dfa.states_count == dfa.states_count
         assert dfa.is_deterministic()
         assert dfa.is_equivalent_to(minimized_dfa)
         assert dfa.accepts(word)
