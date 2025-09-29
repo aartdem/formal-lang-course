@@ -48,7 +48,7 @@ def test_save_two_cycles_graph_to_dot(test_data: dict, tmp_path):
     size2 = test_data["size2"]
     label1 = test_data["label1"]
     label2 = test_data["label2"]
-    path = f"{tmp_path}/{test_data["path"]}"
+    path = f"{tmp_path}/{test_data['path']}"
 
     if test_data["is_succeed"]:
         save_two_cycles_graph_to_dot(size1, size2, label1, label2, path)
